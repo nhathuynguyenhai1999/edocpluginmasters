@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESDoc Hosting Service</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body class="faq">
+
+<header>
+  <a href="/" class="logo"><img src="/-/image/logo.png"/> ESDoc</a>
+  <a href="/-/index.html">Index</a>
+  <a href="/-/generate.html">Generate</a>
+  <a href="/-/search.html">Search</a>
+  <a href="/-/faq.html">FAQ</a>
+</header>
+
+<div class="container">
+
+  <h2>Goal</h2>
+  <p>Gather all JavaScript documentations into one place</p>
+
+  <h2>What is ESDoc?</h2>
+  <p>
+    ESDoc is a good documentation generator for JavaScript.<br/>
+    For more information is <a href="https://esdoc.org">esdoc.org</a>
+  </p>
+
+  <h2>How to update documentation via hands</h2>
+  <p>Update with your hand at <a href="./generate.html">here</a>
+
+  <h2>How to update documentation via API</h2>
+  <p>
+    You can update documentation using API.
+    A sample script is <a href="https://github.com/esdoc/esdoc-hosting/blob/master/script/update-example.sh">here</a>
+  </p>
+
+  <h2>Documentation Coverage Badge</h2>
+  <p>You can use documentation coverage badge.</p>
+  <code>https://doc.esdoc.org/github.com/user-name/repo-name/badge.svg</code><br/>
+
+  <h2>Support repositories</h2>
+  <p>Now, supports only GitHub.</p>
+
+  <h2>Support plugins</h2>
+  <p>You can use <a href="https://github.com/esdoc/esdoc-plugins">esdoc/esdoc-plugins</a>.
+    But you can not use the <code>esdoc-inject-script-plugin</code>.
+  </p>
+
+  <h2>Zero config hosting(without esdoc.json)</h2>
+  <p>
+    If your repository satisfy the following conditions, enable zero config hosting(without esdoc.json).
+    <br/>
+    - ES2015 codes are exist in <code>/src</code> directory<br/>
+    - <code>/package.json</code> is exist
+  </p>
+
+  <h2>Feedback</h2>
+  <p>Please report using <a href="https://github.com/h13i32maru/esdoc-hosting">GitHub Issue</a></p>
+
+</div>
+
+<footer>
+  &#xA9; 2015 <a href="https://twitter.com/h13i32maru">Ryo Maruyama</a>. All rights reserved.
+</footer>
+
+<script src="/-/js/ga.js"></script>
+</body>
+
+</html>

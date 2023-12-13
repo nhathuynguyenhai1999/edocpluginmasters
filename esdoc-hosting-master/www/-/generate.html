@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESDoc Hosting Service</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="./js/ESDoc.js"></script>
+</head>
+
+<body>
+
+<header>
+  <a href="/" class="logo"><img src="/-/image/logo.png"/> ESDoc</a>
+  <a href="/-/index.html">Index</a>
+  <a href="/-/generate.html">Generate</a>
+  <a href="/-/search.html">Search</a>
+  <a href="/-/faq.html">FAQ</a>
+</header>
+
+<div class="container">
+  <div class="how-to-register">
+    <ol>
+      <li>
+        Write documentation with <a href="https://esdoc.org">ESDoc</a> (JSDoc style)
+        <br>
+        <span class="notice">require ES6 and <code>esdoc.json</code> into root directory.</span>
+      </li>
+      <li>
+        Input your repository URL and click generation button.
+        <br>
+        <span class="notice">require <code>git@github.com:foo/bar.git</code> style URL</span>
+      </li>
+    </ol>
+  </div>
+
+  <input id="gitUrl" class="git-url" type="text" placeholder="git@github.com:foo/bar.git"/>
+  <div class="notice">If fail generating documentation, please report issue to <a href="https://github.com/esdoc/esdoc-hosting/issues">here</a>.</div>
+
+  <p>
+    <span id="generateButton" class="action-button generate-button">Generate</span>
+    <span id="deleteButton" class="action-button delete-button">Delete</span>
+  </p>
+
+
+
+
+  <p id="progress" class="progress"></p>
+
+  <p><a id="url"></a></p>
+
+  <p id="errorMessage" class="error-message"></p>
+  <p id="issueLink" class="error-message" style="display: none;">Or write <a href="https://github.com/h13i32maru/esdoc-hosting/issues">issue</a>.</p>
+</div>
+
+<footer>
+  &#xA9; 2015 <a href="https://twitter.com/h13i32maru">Ryo Maruyama</a>. All rights reserved.
+</footer>
+
+<script>
+  var creating = false;
+  var deleting = false;
+  var generateButton = document.querySelector('#generateButton');
+  var deleteButton = document.querySelector('#deleteButton');
+  var errorEl = document.querySelector('#errorMessage');
+  var progress = document.querySelector('#progress');
+  var link = document.querySelector('#url');
+  var issueLink = document.querySelector('#issueLink');
+
+  generateButton.addEventListener('click', function(){
+    if (creating) return;
+
+    errorEl.textContent = '';
+    progress.inenrHTML = '';
+    link.textContent = '';
+    issueLink.style.display = 'none';
+
+    var gitUrl = document.querySelector('#gitUrl').value.trim();
+
+    if (!ESDoc.validateGitURL(gitUrl)) {
+      errorEl.textContent = 'This is invalid git url. Valid format is "git@github.com:foo/bar.git"';
+      return;
+    }
+
+    var timerId = setInterval(function(){
+      progress.innerHTML += '.';
+    }, 1000);
+    progress.innerHTML += 'Please wait.<br/>';
+
+    creating = true;
+
+    ESDoc.post('/api/create', {gitUrl: gitUrl}, function(error, responseText){
+      if (error) {
+        // todo
+        creating = false;
+        clearInterval(timerId);
+        console.error(error, responseText);
+        errorEl.textContent = 'Please retry.';
+        progress.innerHTML = '';
+        issueLink.style.display = '';
+        return;
+      }
+
+      var res = JSON.parse(responseText);
+
+      if (!res.success) {
+        creating = false;
+        clearInterval(timerId);
+        errorEl.textContent = res.message;
+        progress.innerHTML = '';
+        issueLink.style.display = '';
+        return;
+      }
+
+      var path = res.path;
+      var pollingPath = res.path + '/.finish.json';
+      ESDoc.polling(pollingPath, 180000, function(error, responseText){
+        creating = false;
+        clearInterval(timerId);
+        progress.innerHTML = '';
+
+        if (error) {
+          // todo
+          console.error(error);
+          errorEl.textContent = 'Please retry.';
+          issueLink.style.display = '';
+          return;
+        }
+
+        var response = JSON.parse(responseText);
+        if (!response.success) {
+          // todo
+          console.error(response.message);
+          errorEl.textContent = response.message;
+          issueLink.style.display = '';
+          return;
+        }
+
+        link.href = path;
+        link.textContent = path.replace('/', '');
+
+        progress.innerHTML = 'Success!';
+      });
+    });
+  });
+
+  deleteButton.addEventListener('click', function(){
+    if (deleting) return;
+
+    var gitUrl = document.querySelector('#gitUrl').value.trim();
+
+    if (!ESDoc.validateGitURL(gitUrl)) {
+      errorEl.textContent = 'This is invalid git url. Valid format is "git@github.com:foo/bar.git"';
+      return;
+    }
+
+    deleting = true;
+    ESDoc.post('/api/delete', {gitUrl: gitUrl}, function(error, responseText){
+      deleting = false;
+
+      if (error) {
+        // todo
+        console.error(error, responseText);
+        errorEl.textContent = 'Please retry.';
+        progress.innerHTML = '';
+        issueLink.style.display = '';
+        return;
+      }
+
+      var res = JSON.parse(responseText);
+      if (!res.success) {
+        errorEl.textContent = res.message;
+        progress.innerHTML = '';
+        return;
+      }
+
+      progress.innerHTML = 'Success!';
+    });
+  });
+
+  // take git url from location hash
+  if (location.hash) {
+    var gitUrl = location.hash.replace(/^#url=/, '');
+    if (ESDoc.validateGitURL(gitUrl)) {
+      document.querySelector('#gitUrl').value = gitUrl;
+    }
+  }
+</script>
+
+<script src="/-/js/ga.js"></script>
+</body>
+
+</html>
